@@ -53,3 +53,5 @@ Server-side pagination is implemented using the `LIMIT` and `OFFSET` SQL clauses
 3.  Start Development Server: `npm run dev`
 4.  Configure Environment: Create a `.env` file and add your `VITE_API_BASE_URL`.
 5.  Open `http://localhost:5173` in your browser.
+
+**Live Link**: https://truestate.rohitt24k.dev

@@ -40,7 +40,7 @@ export const getSalesQuerySchema = z.object({
       val === undefined || val === null || val === "" ? undefined : Number(val),
     z.number().int().positive().optional().default(10)
   ),
-  search: z.string().optional().default(""),
+  search: z.string().trim().optional().default(""),
   region: z.array(z.enum(allowedRegions)).optional(),
   gender: z.array(z.enum(allowedGenders)).optional(),
   category: z.array(z.enum(allowedCategories)).optional(),

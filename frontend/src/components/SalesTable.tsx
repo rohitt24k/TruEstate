@@ -1,6 +1,8 @@
 import type { T_Sales } from "@/types/sales";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Skeleton } from "./ui/skeleton";
+import { FiCheck, FiCopy } from "react-icons/fi";
+import { useState } from "react";
 
 function SalesTable({
   salesData,
@@ -100,7 +102,9 @@ function SalesTable({
                     <td
                       className={`text-gray-30 px-3 py-3.5 ${idx % 2 != 0 ? "bg-gray-90/50" : ""} text-sm`}
                     >
-                      {sale.customerPhone}
+                      {sale.customerPhone && (
+                        <PhoneNumber phone={sale.customerPhone} />
+                      )}
                     </td>
                     <td
                       className={`text-gray-30 px-3 py-3.5 ${idx % 2 != 0 ? "bg-gray-90/50" : ""} text-sm`}
@@ -125,7 +129,7 @@ function SalesTable({
                     <td
                       className={`text-gray-30 px-3 py-3.5 ${idx % 2 != 0 ? "bg-gray-90/50" : ""} text-sm`}
                     >
-                      {sale.totalAmount}
+                      ₹ {sale.totalAmount}
                     </td>
                     <td
                       className={`text-gray-30 px-3 py-3.5 ${idx % 2 != 0 ? "bg-gray-90/50" : ""} text-sm`}
@@ -162,6 +166,38 @@ function SalesTable({
         <div className="absolute top-20 left-1/2 flex flex-2 -translate-x-1/2 items-center justify-center">
           <p className="text-gray-30 text-sm font-medium">No Data Found</p>
         </div>
+      )}
+    </div>
+  );
+}
+
+function PhoneNumber({ phone }: { phone: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(phone);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {phone}
+      {phone && (
+        <button
+          onClick={handleCopy}
+          className="flex cursor-pointer items-center gap-1 border-none outline-none"
+        >
+          {copied ? (
+            <>
+              <FiCheck size={16} className="text-green-20" />
+            </>
+          ) : (
+            <FiCopy size={16} />
+          )}
+        </button>
       )}
     </div>
   );

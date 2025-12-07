@@ -36,14 +36,17 @@ import {
 
 type FiltersProps = {
   filters: T_GetSalesDataFilters;
-  setFilters: React.Dispatch<React.SetStateAction<T_GetSalesDataFilters>>;
-  resetPagination: () => void;
+  setFilters: (
+    update:
+      | T_GetSalesDataFilters
+      | ((prev: T_GetSalesDataFilters) => T_GetSalesDataFilters),
+    resetPagination?: boolean,
+  ) => void;
 };
 
 function FilterInputs({
   filters,
   setFilters,
-  resetPagination,
   className,
 }: FiltersProps & { className?: string }) {
   const selectedRegions = filters.region || [];
@@ -53,8 +56,7 @@ function FilterInputs({
   const selectedPaymentMethods = filters.paymentMethod || [];
 
   const handleChangeFilters = (filters: Partial<T_GetSalesDataFilters>) => {
-    resetPagination();
-    setFilters((prev) => ({ ...prev, ...filters }));
+    setFilters((prev) => ({ ...prev, ...filters }), true);
   };
 
   return (
@@ -70,6 +72,9 @@ function FilterInputs({
             paymentMethod: [],
             minAge: undefined,
             maxAge: undefined,
+            sortBy: undefined,
+            sortOrder: undefined,
+            search: "",
           })
         }
         className="bg-gray-90 hover:bg-gray-80 h-7 w-fit cursor-pointer rounded px-2 py-1.5 transition-colors"
@@ -147,7 +152,7 @@ function FilterInputs({
   );
 }
 
-function SalesFilters({ filters, setFilters, resetPagination }: FiltersProps) {
+function SalesFilters({ filters, setFilters }: FiltersProps) {
   const getSortValue = () => {
     const { sortBy, sortOrder } = filters;
     if (!sortBy) return "Customer Name (A-Z)";
@@ -232,7 +237,6 @@ function SalesFilters({ filters, setFilters, resetPagination }: FiltersProps) {
                     filters={filters}
                     setFilters={setFilters}
                     className="flex flex-col gap-4"
-                    resetPagination={resetPagination}
                   />
                 </div>
               </SheetContent>
@@ -244,13 +248,12 @@ function SalesFilters({ filters, setFilters, resetPagination }: FiltersProps) {
             filters={filters}
             setFilters={setFilters}
             className="flex flex-1 flex-wrap items-center gap-2.5 max-md:hidden"
-            resetPagination={resetPagination}
           />
         </div>
 
         {/* sorting */}
         <div>
-          <Select onValueChange={handleSortChange} defaultValue={currentSort}>
+          <Select onValueChange={handleSortChange} value={currentSort}>
             <SelectTrigger className="bg-gray-90 h-7! rounded! border-none shadow-none">
               <SelectValue
                 placeholder={<p className="text-gray-20 text-base">Sort By</p>}

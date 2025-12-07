@@ -1,5 +1,5 @@
 import Sidebar from "@/components/Sidebar";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ApiService } from "@/services";
 import SalesTable from "@/components/SalesTable";
@@ -93,55 +93,63 @@ function SalesPage() {
     [getSalesData],
   );
 
-  const setFilters = (
-    update:
-      | T_GetSalesDataFilters
-      | ((prev: T_GetSalesDataFilters) => T_GetSalesDataFilters),
-  ) => {
-    setSearchParams((prevParams) => {
-      const currentFilters: T_GetSalesDataFilters = {
-        page: Number(prevParams.get("page")) || 1,
-        limit: Number(prevParams.get("limit")) || DEFAULT_LIMIT,
-        search: prevParams.get("search") || "",
-        sortBy: prevParams.get("sortBy") as T_GetSalesDataFilters["sortBy"],
-        sortOrder: prevParams.get(
-          "sortOrder",
-        ) as T_GetSalesDataFilters["sortOrder"],
-        region: prevParams.getAll("region") as T_GetSalesDataFilters["region"],
-        gender: prevParams.getAll("gender") as T_GetSalesDataFilters["gender"],
-        category: prevParams.getAll(
-          "category",
-        ) as T_GetSalesDataFilters["category"],
-        tag: prevParams.getAll("tag") as T_GetSalesDataFilters["tag"],
-        paymentMethod: prevParams.getAll(
-          "paymentMethod",
-        ) as T_GetSalesDataFilters["paymentMethod"],
-        minAge: prevParams.get("minAge")
-          ? Number(prevParams.get("minAge"))
-          : undefined,
-        maxAge: prevParams.get("maxAge")
-          ? Number(prevParams.get("maxAge"))
-          : undefined,
-      };
+  const setFilters = useCallback(
+    (
+      update:
+        | T_GetSalesDataFilters
+        | ((prev: T_GetSalesDataFilters) => T_GetSalesDataFilters),
+      resetPagination: boolean = false,
+    ) => {
+      setSearchParams((prevParams) => {
+        const currentFilters: T_GetSalesDataFilters = {
+          page: resetPagination ? 1 : Number(prevParams.get("page")) || 1,
+          limit: Number(prevParams.get("limit")) || DEFAULT_LIMIT,
+          search: prevParams.get("search") || "",
+          sortBy: prevParams.get("sortBy") as T_GetSalesDataFilters["sortBy"],
+          sortOrder: prevParams.get(
+            "sortOrder",
+          ) as T_GetSalesDataFilters["sortOrder"],
+          region: prevParams.getAll(
+            "region",
+          ) as T_GetSalesDataFilters["region"],
+          gender: prevParams.getAll(
+            "gender",
+          ) as T_GetSalesDataFilters["gender"],
+          category: prevParams.getAll(
+            "category",
+          ) as T_GetSalesDataFilters["category"],
+          tag: prevParams.getAll("tag") as T_GetSalesDataFilters["tag"],
+          paymentMethod: prevParams.getAll(
+            "paymentMethod",
+          ) as T_GetSalesDataFilters["paymentMethod"],
+          minAge: prevParams.get("minAge")
+            ? Number(prevParams.get("minAge"))
+            : undefined,
+          maxAge: prevParams.get("maxAge")
+            ? Number(prevParams.get("maxAge"))
+            : undefined,
+        };
 
-      const newFilters =
-        typeof update === "function" ? update(currentFilters) : update;
+        const newFilters =
+          typeof update === "function" ? update(currentFilters) : update;
 
-      const newParams = new URLSearchParams();
+        const newParams = new URLSearchParams();
 
-      // Helper to append params
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === "") return;
-        if (Array.isArray(value)) {
-          value.forEach((v) => newParams.append(key, String(v)));
-        } else {
-          newParams.set(key, String(value));
-        }
+        // Helper to append params
+        Object.entries(newFilters).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === "") return;
+          if (Array.isArray(value)) {
+            value.forEach((v) => newParams.append(key, String(v)));
+          } else {
+            newParams.set(key, String(value));
+          }
+        });
+
+        return newParams;
       });
-
-      return newParams;
-    });
-  };
+    },
+    [setSearchParams],
+  );
 
   const onPageChange = (page: number) => {
     setFilters((prev) => ({
@@ -157,13 +165,6 @@ function SalesPage() {
     }));
   };
 
-  const handleResetPagination = () => {
-    setFilters((prev) => ({
-      ...prev,
-      page: 1,
-    }));
-  };
-
   return (
     <div className="flex h-screen">
       <Sidebar
@@ -174,16 +175,11 @@ function SalesPage() {
         <SalesHeader
           search={filters.search ?? ""}
           onSearchChange={(search: string) => {
-            setFilters((prev) => ({ ...prev, search }));
-            handleResetPagination();
+            setFilters((prev) => ({ ...prev, search }), true);
           }}
           setShowSidebar={setShowSidebar}
         />
-        <SalesFilters
-          filters={filters}
-          setFilters={setFilters}
-          resetPagination={handleResetPagination}
-        />
+        <SalesFilters filters={filters} setFilters={setFilters} />
         <SalesCards {...kpiData} isLoading={isLoading} />
         <SalesTable
           salesData={salesData}

@@ -21,9 +21,8 @@ function SalesHeader({
   const debouncedSearch = useDebounce(searchValue, 500);
 
   useEffect(() => {
-    if (debouncedSearch !== search) {
-      onSearchChange(debouncedSearch);
-    }
+    onSearchChange(debouncedSearch);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
   return (
